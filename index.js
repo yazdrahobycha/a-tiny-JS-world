@@ -2,76 +2,116 @@ import { print } from './js/lib.js';
 /* Refer to https://github.com/OleksiyRudenko/a-tiny-JS-world for the task details
 
    Code repository: https://github.com/yazdrahobycha/a-tiny-JS-world
-   Web app: _put project's github pages URL here_
    */
 
 // ======== OBJECTS DEFINITIONS ========
-const dog = {
-    species: 'dog',
-    name: 'Sharik',
-    gender: 'male',
-    hands: 0,
-    legs: 4,
-    saying: 'GAV!!!',
-    friends: ['Vova'],
-};
 
-const cat = {
-    species: 'cat',
-    name: 'Dina',
-    gender: 'female',
-    hands: 0,
-    legs: 4,
-    saying: 'Miau!',
-    friends: ['Sasha', 'Liza'],
-};
+class Inhabitant {
+    constructor(name, species, gender, saying) {
+        this.name = name;
+        this.species = species;
+        this.gender = gender;
+        this.saying = saying;
+    }
 
-const woman = {
-    species: 'human',
-    name: 'Sasha',
-    gender: 'female',
-    hands: 2,
-    legs: 2,
-    saying: 'Iu!',
-    friends: ['Dina', 'Liza'],
-};
+    introduce() {
+        return ['name', 'species', 'gender', 'saying']
+            .map((prop) => `${prop}: ${this[prop]}`)
+            .join('; ');
+    }
+}
 
-const man = {
-    species: 'human',
-    name: 'Vova',
-    gender: 'male',
-    hands: 2,
-    legs: 2,
-    saying: 'Based!',
-    friends: ['Sharik', 'Liza'],
-};
+class Humanoid extends Inhabitant {
+    constructor(name, species, gender, saying) {
+        super(name, species, gender, saying);
+        this.legs = 2;
+        this.hands = 2;
+    }
 
-const cat_Woman = {
-    species: 'cat-human',
-    name: 'Liza',
-    gender: 'female',
-    hands: 2,
-    legs: 2,
-    saying: cat.saying,
-    friends: ['Dina', 'Vova', 'Liza'],
-};
-// ======== OUTPUT ========
-const inhabitants = [dog, cat, woman, man, cat_Woman];
-const properties = [
-    'species',
-    'name',
-    'gender',
-    'hands',
-    'legs',
-    'saying',
-    'friends',
+    introduce() {
+        return (
+            super.introduce() +
+            '; ' +
+            ['legs', 'hands'].map((prop) => `${prop}: ${this[prop]}`).join('; ')
+        );
+    }
+}
+
+class HomoSapiens extends Humanoid {
+    constructor(name, gender, saying) {
+        super(name, 'human', gender, saying);
+    }
+}
+
+class Man extends HomoSapiens {
+    constructor(name, saying) {
+        super(name, 'male', saying);
+    }
+}
+
+class Women extends HomoSapiens {
+    constructor(name, saying) {
+        super(name, 'female', saying);
+    }
+}
+
+class Animal extends Inhabitant {
+    constructor(name, species, gender, saying) {
+        super(name, species, gender, saying);
+        this.legs = 4;
+    }
+
+    introduce() {
+        return super.introduce() + '; legs: ' + this.legs + '; ';
+    }
+}
+
+class Dog extends Animal {
+    constructor(name, gender) {
+        super(name, 'dog', gender, Dog.saying());
+    }
+
+    static saying() {
+        return 'Woof!';
+    }
+}
+
+class Cat extends Animal {
+    constructor(name, gender) {
+        super(name, 'cat', gender, Cat.saying());
+    }
+
+    static saying() {
+        return 'Meow!';
+    }
+}
+
+class CatWoman extends Humanoid {
+    constructor(name) {
+        super(name, 'cat-women', 'female', Cat.saying());
+    }
+}
+
+const man = new Man('Grisha', 'Bruh!');
+const woman = new Women('Liza', 'Iu!');
+const dog = new Dog('Dina', 'female');
+const cat = new Cat('Pukch', 'male');
+const catWoman = new CatWoman('Sasha');
+
+const friendships = [
+    { inhabitant: man, friends: [dog, catWoman] },
+    { inhabitant: woman, friends: [cat, catWoman] },
+    { inhabitant: dog, friends: [man, woman] },
+    { inhabitant: cat, friends: [] },
+    { inhabitant: catWoman, friends: [man, cat] },
 ];
-inhabitants.forEach((obj) =>
+
+friendships.forEach(({ inhabitant, friends }) => {
     print(
-        `<i>${properties
-            .map((prop) =>
-                !Array.isArray(obj[prop]) ? obj[prop] : obj[prop].join(', ')
-            )
-            .join('; ')}</i>`
-    )
-);
+        `<i>${inhabitant.introduce()}; friends: ${
+            friends.length > 0
+                ? friends.map(({ name }) => name).join(', ')
+                : `No friends yet:(`
+        }</i>`
+    );
+});
